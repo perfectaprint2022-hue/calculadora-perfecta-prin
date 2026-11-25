@@ -3,7 +3,7 @@ services:
     name: calculadora-perfecta-print
     env: node
     plan: free
-    buildCommand: pnpm install --ignore-scripts && pnpm run build
+    buildCommand: pnpm install --prod --ignore-scripts
     startCommand: node artifacts/api-server/dist/index.mjs
     envVars:
       - key: NODE_ENV
