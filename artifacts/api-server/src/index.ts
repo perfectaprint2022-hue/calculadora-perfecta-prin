@@ -1,5 +1,6 @@
 import app from "./app";
 import { ensureMasterAccount } from "./lib/auth";
+import { initDatabase } from "./lib/init-db";
 import { logger } from "./lib/logger";
 
 const rawPort = process.env["PORT"];
@@ -18,9 +19,10 @@ if (Number.isNaN(port) || port <= 0) {
 
 async function startServer(): Promise<void> {
   try {
+    await initDatabase();
     await ensureMasterAccount();
   } catch (err) {
-    logger.error({ err }, "Master account provisioning failed");
+    logger.error({ err }, "Database initialization or master account provisioning failed");
     process.exit(1);
   }
 
