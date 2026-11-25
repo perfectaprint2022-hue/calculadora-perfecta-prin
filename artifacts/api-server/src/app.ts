@@ -63,8 +63,8 @@ const staticDir = candidates.find((dir) => fs.existsSync(dir));
 if (staticDir) {
   logger.info({ staticDir }, "Serving static frontend files");
   app.use(express.static(staticDir));
-  app.get("*", (req, res, next) => {
-    if (req.path.startsWith("/api")) {
+  app.use((req, res, next) => {
+    if (req.method !== "GET" || req.path.startsWith("/api")) {
       return next();
     }
     res.sendFile(path.join(staticDir, "index.html"));
