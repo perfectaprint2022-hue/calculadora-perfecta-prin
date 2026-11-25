@@ -1,4 +1,6 @@
 import express, { type Express } from "express";
+import path from "node:path";
+import fs from "node:fs";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { clerkMiddleware } from "@clerk/express";
@@ -48,5 +50,25 @@ app.use(
 );
 
 app.use("/api", router);
+
+// Servir os arquivos compilados do frontend (SPA)
+const candidates = [
+  path.resolve(process.cwd(), "artifacts/calculadora-etiquetas/dist/public"),
+  path.resolve(process.cwd(), "public"),
+  path.resolve(__dirname, "../../calculadora-etiquetas/dist/public"),
+];
+
+const staticDir = candidates.find((dir) => fs.existsSync(dir));
+
+if (staticDir) {
+  logger.info({ staticDir }, "Serving static frontend files");
+  app.use(express.static(staticDir));
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api")) {
+      return next();
+    }
+    res.sendFile(path.join(staticDir, "index.html"));
+  });
+}
 
 export default app;
