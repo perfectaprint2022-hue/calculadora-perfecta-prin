@@ -71700,19 +71700,21 @@ app.use(
     }
   })
 );
-app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 app.use((0, import_cors.default)({ credentials: true, origin: true }));
 app.use(import_express6.default.json());
 app.use(import_express6.default.urlencoded({ extended: true }));
 app.use((0, import_cookie_parser.default)());
-app.use(
-  clerkMiddleware((req) => ({
-    publishableKey: publishableKeyFromHost(
-      getClerkProxyHost(req) ?? "",
-      process.env.CLERK_PUBLISHABLE_KEY
-    )
-  }))
-);
+if (process.env.CLERK_SECRET_KEY && process.env.CLERK_PUBLISHABLE_KEY) {
+  app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
+  app.use(
+    clerkMiddleware((req) => ({
+      publishableKey: publishableKeyFromHost(
+        getClerkProxyHost(req) ?? "",
+        process.env.CLERK_PUBLISHABLE_KEY
+      )
+    }))
+  );
+}
 app.use("/api", routes_default);
 var candidates = [
   path.resolve(process.cwd(), "artifacts/calculadora-etiquetas/dist/public"),
