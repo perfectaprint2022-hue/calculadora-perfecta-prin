@@ -624,7 +624,7 @@ const consultations: Record<ConsultationKey, { label: string; icon: typeof FileT
     label: 'Tabela Base Preço',
     icon: FileText,
     columns: ['Categoria', 'Material', 'Fornecedor', 'Preço inicial'],
-    rows: workbookData.base.slice(0, 36).map((row) => ['Adesivo', row.material, row.supplier, formatMoney(row.price)]),
+    rows: workbookData.base.map((row) => ['Adesivo', row.material, row.supplier, formatMoney(row.price)]),
   },
   ribb: {
     label: 'Tabela Ribbon',
@@ -641,7 +641,7 @@ const consultations: Record<ConsultationKey, { label: string; icon: typeof FileT
     label: 'Facas Flexo',
     icon: Scissors,
     columns: ['Nº', 'Medida', 'Z', 'Juntas / separada'],
-    rows: workbookData.flexo.slice(0, 120).map((row) => [
+    rows: workbookData.flexo.map((row) => [
       row.number ? String(row.number) : '—',
       row.measure || '—',
       row.z ? `Z ${row.z}` : '—',
@@ -652,7 +652,7 @@ const consultations: Record<ConsultationKey, { label: string; icon: typeof FileT
     label: 'Facas Batida',
     icon: Ruler,
     columns: ['Nº', 'Medida', 'Observação', 'Fonte'],
-    rows: workbookData.batida.slice(0, 120).map((row) => [
+    rows: workbookData.batida.map((row) => [
       row.number ? String(row.number) : '—',
       row.measure || '—',
       row.note || '—',
