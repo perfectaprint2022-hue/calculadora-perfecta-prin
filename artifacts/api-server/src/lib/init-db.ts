@@ -75,12 +75,12 @@ export async function initDatabase(): Promise<void> {
       VALUES (
         'rusevel_admin',
         'Administrador',
-        'scrypt$fHuEYxLQI9UyFoeY0QBrJA==$BIddKfdy5HuoYe8XV2u3KNqtaKMFED5MMjsMyUJBK9MCaLVYQUHZ+x5JDH7xmVat0lLiCC94bH7/in2sqBQHvg==',
+        'scrypt$16384$8$1$VdFBrtSlHcNBDhUI7-vv0Q$-zR1GjNMkq2K2q5F-ItctS3rldZZjJ0XthF1x35bs3Pih3LsO7JjF0CqevemSc97EsEAZlonFQur5Mb9yPMycQ',
         'user',
         'active'
       )
       ON CONFLICT (username) DO UPDATE
-      SET password_hash = 'scrypt$fHuEYxLQI9UyFoeY0QBrJA==$BIddKfdy5HuoYe8XV2u3KNqtaKMFED5MMjsMyUJBK9MCaLVYQUHZ+x5JDH7xmVat0lLiCC94bH7/in2sqBQHvg==',
+      SET password_hash = 'scrypt$16384$8$1$VdFBrtSlHcNBDhUI7-vv0Q$-zR1GjNMkq2K2q5F-ItctS3rldZZjJ0XthF1x35bs3Pih3LsO7JjF0CqevemSc97EsEAZlonFQur5Mb9yPMycQ',
           status = 'active',
           updated_at = NOW();
     `);
